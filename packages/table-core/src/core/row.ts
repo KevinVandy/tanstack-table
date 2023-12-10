@@ -1,11 +1,27 @@
-import { RowData, Cell, Row, Table } from '../types'
-import { flattenBy, memo } from '../utils'
-import { createCell } from './cell'
+import {
+  _getAllRowCellsByColumnId,
+  getAllRowCells,
+  getRowLeafRows,
+  getRowParentRow,
+  getRowParentRows,
+  getRowValue,
+  getUniqueRowValues,
+  renderRowValue,
+} from '../functions/coreRowFunctions'
+import { RowData, Cell, Row, Table, CellData } from '../types'
+import { memo } from '../utils'
+import { CoreCell } from './cell'
 
-export interface CoreRow<TData extends RowData> {
+// row instance types
+export interface CoreRow<
+  TData extends RowData,
+  TValue extends CellData = CellData,
+  TCell extends CoreCell<TData, TValue> = CoreCell<TData, TValue>,
+  TRow extends Row<TData> = Row<TData>
+> {
   _getAllCellsByColumnId: () => Record<string, Cell<TData, unknown>>
-  _uniqueValuesCache: Record<string, unknown>
-  _valuesCache: Record<string, unknown>
+  _uniqueValuesCache: Record<string, TValue>
+  _valuesCache: Record<string, TValue>
   /**
    * The depth of the row (if nested or grouped) relative to the root row array.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#depth)
@@ -17,25 +33,25 @@ export interface CoreRow<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getallcells)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getAllCells: () => Cell<TData, unknown>[]
+  getAllCells: () => TCell[]
   /**
    * Returns the leaf rows for the row, not including any parent rows.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getleafrows)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getLeafRows: () => Row<TData>[]
+  getLeafRows: () => TRow[]
   /**
    * Returns the parent row for the row, if it exists.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getparentrow)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getParentRow: () => Row<TData> | undefined
+  getParentRow: () => TRow | undefined
   /**
    * Returns the parent rows for the row, all the way up to a root row.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getparentrows)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getParentRows: () => Row<TData>[]
+  getParentRows: () => TRow[]
   /**
    * Returns a unique array of values from the row for a given columnId.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getuniquevalues)
@@ -89,9 +105,10 @@ export interface CoreRow<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#subrows)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  subRows: Row<TData>[]
+  subRows: TRow[]
 }
 
+// row instance creation
 export const createRow = <TData extends RowData>(
   table: Table<TData>,
   id: string,
@@ -100,95 +117,38 @@ export const createRow = <TData extends RowData>(
   depth: number,
   subRows?: Row<TData>[],
   parentId?: string
-): Row<TData> => {
-  let row: CoreRow<TData> = {
+): CoreRow<TData> => {
+  const row: CoreRow<TData> = {
     id,
     index: rowIndex,
     original,
     depth,
     parentId,
+    subRows: subRows ?? [],
     _valuesCache: {},
     _uniqueValuesCache: {},
-    getValue: columnId => {
-      if (row._valuesCache.hasOwnProperty(columnId)) {
-        return row._valuesCache[columnId]
-      }
-
-      const column = table.getColumn(columnId)
-
-      if (!column?.accessorFn) {
-        return undefined
-      }
-
-      row._valuesCache[columnId] = column.accessorFn(
-        row.original as TData,
-        rowIndex
-      )
-
-      return row._valuesCache[columnId] as any
-    },
-    getUniqueValues: columnId => {
-      if (row._uniqueValuesCache.hasOwnProperty(columnId)) {
-        return row._uniqueValuesCache[columnId]
-      }
-
-      const column = table.getColumn(columnId)
-
-      if (!column?.accessorFn) {
-        return undefined
-      }
-
-      if (!column.columnDef.getUniqueValues) {
-        row._uniqueValuesCache[columnId] = [row.getValue(columnId)]
-        return row._uniqueValuesCache[columnId]
-      }
-
-      row._uniqueValuesCache[columnId] = column.columnDef.getUniqueValues(
-        row.original as TData,
-        rowIndex
-      )
-
-      return row._uniqueValuesCache[columnId] as any
-    },
+    getValue: columnId =>
+      getRowValue({ columnId, row: row as Row<TData>, rowIndex, table }),
+    getUniqueValues: columnId =>
+      getUniqueRowValues({ columnId, row: row as Row<TData>, rowIndex, table }),
     renderValue: columnId =>
-      row.getValue(columnId) ?? table.options.renderFallbackValue,
-    subRows: subRows ?? [],
-    getLeafRows: () => flattenBy(row.subRows, d => d.subRows),
-    getParentRow: () => (row.parentId ? table.getRow(row.parentId, true) : undefined),
-    getParentRows: () => {
-      let parentRows: Row<TData>[] = []
-      let currentRow = row
-      while (true) {
-        const parentRow = currentRow.getParentRow()
-        if (!parentRow) break
-        parentRows.push(parentRow)
-        currentRow = parentRow
-      }
-      return parentRows.reverse()
-    },
+      renderRowValue({ row: row as Row<TData>, columnId, table }),
+    getLeafRows: () => getRowLeafRows({ row }),
+    getParentRow: () => getRowParentRow({ row, table }),
+    getParentRows: () => getRowParentRows({ row }),
     getAllCells: memo(
       () => [table.getAllLeafColumns()],
-      leafColumns => {
-        return leafColumns.map(column => {
-          return createCell(table, row as Row<TData>, column, column.id)
-        })
-      },
+      leafColumns =>
+        getAllRowCells({ leafColumns, row: row as Row<TData>, table }),
       {
         key: process.env.NODE_ENV === 'development' && 'row.getAllCells',
         debug: () => table.options.debugAll ?? table.options.debugRows,
       }
     ),
-
     _getAllCellsByColumnId: memo(
       () => [row.getAllCells()],
       allCells => {
-        return allCells.reduce(
-          (acc, cell) => {
-            acc[cell.column.id] = cell
-            return acc
-          },
-          {} as Record<string, Cell<TData, unknown>>
-        )
+        return _getAllRowCellsByColumnId({ allCells })
       },
       {
         key:

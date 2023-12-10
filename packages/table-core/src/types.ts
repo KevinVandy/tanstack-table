@@ -1,4 +1,4 @@
-import { CoreOptions, CoreTableState, CoreInstance } from './core/table'
+import { CoreOptions, CoreTableState, CoreTable } from './core/table'
 import {
   VisibilityInstance,
   VisibilityTableState,
@@ -100,12 +100,14 @@ export interface AggregationFns {}
 export type Updater<T> = T | ((old: T) => T)
 export type OnChangeFn<T> = (updaterOrValue: Updater<T>) => void
 
-export type RowData = unknown | object | any[]
+export type RowData = Record<string, any>
+
+export type CellData = any
 
 export type AnyRender = (Comp: any, props: any) => any
 
 export interface Table<TData extends RowData>
-  extends CoreInstance<TData>,
+  extends CoreTable<TData>,
     HeadersInstance<TData>,
     VisibilityInstance<TData>,
     ColumnOrderInstance<TData>,

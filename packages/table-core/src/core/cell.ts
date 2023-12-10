@@ -1,3 +1,8 @@
+import {
+  getCellContext,
+  getCellValue,
+  renderCellValue,
+} from '../functions/coreCellFunctions'
 import { RowData, Cell, Column, Row, Table } from '../types'
 import { Getter, memo } from '../utils'
 
@@ -52,28 +57,17 @@ export interface CoreCell<TData extends RowData, TValue> {
 export function createCell<TData extends RowData, TValue>(
   table: Table<TData>,
   row: Row<TData>,
-  column: Column<TData, TValue>,
-  columnId: string
+  column: Column<TData, TValue>
 ): Cell<TData, TValue> {
-  const getRenderValue = () =>
-    cell.getValue() ?? table.options.renderFallbackValue
-
   const cell: CoreCell<TData, TValue> = {
     id: `${row.id}_${column.id}`,
     row,
     column,
-    getValue: () => row.getValue(columnId),
-    renderValue: getRenderValue,
+    getValue: () => getCellValue({ row, column }),
+    renderValue: () => renderCellValue({ cell, table }),
     getContext: memo(
-      () => [table, column, row, cell],
-      (table, column, row, cell) => ({
-        table,
-        column,
-        row,
-        cell: cell as Cell<TData, TValue>,
-        getValue: cell.getValue,
-        renderValue: cell.renderValue,
-      }),
+      () => [table, cell],
+      (table, cell) => getCellContext({ cell, table }),
       {
         key: process.env.NODE_ENV === 'development' && 'cell.getContext',
         debug: () => table.options.debugAll,

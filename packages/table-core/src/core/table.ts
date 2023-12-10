@@ -32,6 +32,12 @@ import { Pinning } from '../features/Pinning'
 import { RowSelection } from '../features/RowSelection'
 import { Sorting } from '../features/Sorting'
 import { Visibility } from '../features/Visibility'
+import {
+  _getTableDefaultColumnDef,
+  getAllTableFlatColumns,
+  getAllTableLeafColumns,
+  resetTable,
+} from '../functions/coreTableFunctions'
 
 export interface TableFeature {
   createCell?: (cell: any, column: any, row: any, table: any) => any
@@ -182,7 +188,7 @@ export interface CoreOptions<TData extends RowData> {
   state: Partial<TableState>
 }
 
-export interface CoreInstance<TData extends RowData> {
+export interface CoreTable<TData extends RowData> {
   _features: readonly TableFeature[]
   _getAllFlatColumnsById: () => Record<string, Column<TData, unknown>>
   _getColumnDefs: () => ColumnDef<TData, unknown>[]
@@ -308,7 +314,7 @@ export function createTable<TData extends RowData>(
   const queued: (() => void)[] = []
   let queuedTimeout = false
 
-  const coreInstance: CoreInstance<TData> = {
+  const coreInstance: CoreTable<TData> = {
     _features: features,
     options: {
       ...defaultOptions,
@@ -338,7 +344,7 @@ export function createTable<TData extends RowData>(
       }
     },
     reset: () => {
-      table.setState(table.initialState)
+      resetTable({ table })
     },
     setOptions: updater => {
       const newOptions = functionalUpdate(updater, table.options)
@@ -390,32 +396,7 @@ export function createTable<TData extends RowData>(
     _getDefaultColumnDef: memo(
       () => [table.options.defaultColumn],
       defaultColumn => {
-        defaultColumn = (defaultColumn ?? {}) as Partial<
-          ColumnDef<TData, unknown>
-        >
-
-        return {
-          header: props => {
-            const resolvedColumnDef = props.header.column
-              .columnDef as ColumnDefResolved<TData>
-
-            if (resolvedColumnDef.accessorKey) {
-              return resolvedColumnDef.accessorKey
-            }
-
-            if (resolvedColumnDef.accessorFn) {
-              return resolvedColumnDef.id
-            }
-
-            return null
-          },
-          // footer: props => props.header.column.id,
-          cell: props => props.renderValue<any>()?.toString?.() ?? null,
-          ...table._features.reduce((obj, feature) => {
-            return Object.assign(obj, feature.getDefaultColumnDef?.())
-          }, {}),
-          ...defaultColumn,
-        } as Partial<ColumnDef<TData, unknown>>
+        return _getTableDefaultColumnDef({ defaultColumn, table })
       },
       {
         debug: () => table.options.debugAll ?? table.options.debugColumns,
@@ -460,9 +441,7 @@ export function createTable<TData extends RowData>(
     getAllFlatColumns: memo(
       () => [table.getAllColumns()],
       allColumns => {
-        return allColumns.flatMap(column => {
-          return column.getFlatColumns()
-        })
+        return getAllTableFlatColumns({ allColumns, table })
       },
       {
         key: process.env.NODE_ENV === 'development' && 'getAllFlatColumns',
@@ -488,10 +467,9 @@ export function createTable<TData extends RowData>(
     ),
 
     getAllLeafColumns: memo(
-      () => [table.getAllColumns(), table._getOrderColumnsFn()],
-      (allColumns, orderColumns) => {
-        let leafColumns = allColumns.flatMap(column => column.getLeafColumns())
-        return orderColumns(leafColumns)
+      () => [table.getAllColumns()],
+      allColumns => {
+        getAllTableLeafColumns({ allColumns })
       },
       {
         key: process.env.NODE_ENV === 'development' && 'getAllLeafColumns',

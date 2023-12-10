@@ -1,4 +1,9 @@
 import {
+  getColumnFlatColumns,
+  getColumnLeafColumns,
+} from '../functions/coreColumnFunctions'
+import { _getTableOrderColumnsFn } from '../functions/orderingFunctions'
+import {
   Column,
   Table,
   AccessorFn,
@@ -132,10 +137,7 @@ export function createColumn<TData extends RowData, TValue>(
     getFlatColumns: memo(
       () => [true],
       () => {
-        return [
-          column as Column<TData, TValue>,
-          ...column.columns?.flatMap(d => d.getFlatColumns()),
-        ]
+        return getColumnFlatColumns({ column })
       },
       {
         key: process.env.NODE_ENV === 'production' && 'column.getFlatColumns',
@@ -143,23 +145,16 @@ export function createColumn<TData extends RowData, TValue>(
       }
     ),
     getLeafColumns: memo(
-      () => [table._getOrderColumnsFn()],
-      orderColumns => {
-        if (column.columns?.length) {
-          let leafColumns = column.columns.flatMap(column =>
-            column.getLeafColumns()
-          )
-
-          return orderColumns(leafColumns)
-        }
-
-        return [column as Column<TData, TValue>]
+      () => [true],
+      () => {
+        return getColumnLeafColumns({ column })
       },
       {
         key: process.env.NODE_ENV === 'production' && 'column.getLeafColumns',
         debug: () => table.options.debugAll ?? table.options.debugColumns,
       }
     ),
+
   }
 
   for (const feature of table._features) {
