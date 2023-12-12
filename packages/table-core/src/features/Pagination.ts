@@ -154,7 +154,7 @@ export interface PaginationInstance<TData extends RowData> {
 const defaultPageIndex = 0
 const defaultPageSize = 10
 
-const getDefaultPaginationState = (): PaginationState => ({
+export const getDefaultPaginationState = (): PaginationState => ({
   pageIndex: defaultPageIndex,
   pageSize: defaultPageSize,
 })
