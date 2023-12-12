@@ -5,7 +5,7 @@ import { CellData, RowData } from '../types'
 
 export function _getTableOrderColumnsFn<
   TData extends RowData,
-  TValue extends CellData,
+  TValue extends CellData = CellData,
   TColumn extends CoreColumn<TData, TValue>,
   TTable extends CoreTable<TData>,
 >({ columns, table }: { columns: TColumn[]; table: TTable }): TColumn[] {

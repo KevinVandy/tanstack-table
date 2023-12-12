@@ -1,4 +1,5 @@
 import { TableFeature } from '../core/table'
+import { getTablePageCount } from '../functions/paginationFunctions'
 import { OnChangeFn, Table, RowModel, Updater, RowData } from '../types'
 import { functionalUpdate, makeStateUpdater, memo } from '../utils'
 
@@ -151,8 +152,8 @@ export interface PaginationInstance<TData extends RowData> {
 
 //
 
-const defaultPageIndex = 0
-const defaultPageSize = 10
+export const defaultPageIndex = 0
+export const defaultPageSize = 10
 
 export const getDefaultPaginationState = (): PaginationState => ({
   pageIndex: defaultPageIndex,
@@ -282,7 +283,7 @@ export const Pagination: TableFeature = {
       })
 
     table.getPageOptions = memo(
-      () => [table.getPageCount()],
+      () => [getTablePageCount({ table })],
       pageCount => {
         let pageOptions: number[] = []
         if (pageCount && pageCount > 0) {
