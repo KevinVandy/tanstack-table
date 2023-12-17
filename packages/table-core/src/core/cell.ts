@@ -3,10 +3,15 @@ import {
   getCellValue,
   renderCellValue,
 } from '../functions/coreCellFunctions'
-import { RowData, Cell, Column, Row, Table } from '../types'
+import { RowData, Cell, Column, Row, Table, CellData } from '../types'
 import { Getter, memo } from '../utils'
+import { TableFeature } from './table'
 
-export interface CellContext<TData extends RowData, TValue> {
+export interface CellContext<
+  TData extends RowData,
+  TValue extends CellData,
+  TFeatures extends Array<TableFeature<TData, TValue, TFeatures>>,
+> {
   cell: Cell<TData, TValue>
   column: Column<TData, TValue>
   getValue: Getter<TValue>
@@ -15,7 +20,7 @@ export interface CellContext<TData extends RowData, TValue> {
   table: Table<TData>
 }
 
-export interface CoreCell<TData extends RowData, TValue> {
+export interface CoreCell<TData extends RowData, TValue = CellData> {
   /**
    * The associated Column object for the cell.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/cell#column)

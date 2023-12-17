@@ -13,12 +13,12 @@ import {
   TableOptions,
   RowData,
   TableMeta,
-  ColumnDefResolved,
   GroupColumnDef,
+  CellData,
 } from '../types'
 
 //
-import { createColumn } from './column'
+import { CoreColumn, createColumn } from './column'
 import { Headers } from './headers'
 //
 
@@ -38,15 +38,35 @@ import {
   getAllTableLeafColumns,
   resetTable,
 } from '../functions/coreTableFunctions'
+import { CoreCell } from './cell'
+import { CoreRow } from './row'
 
-export interface TableFeature {
-  createCell?: (cell: any, column: any, row: any, table: any) => any
-  createColumn?: (column: any, table: any) => any
-  createHeader?: (column: any, table: any) => any
-  createRow?: (row: any, table: any) => any
-  createTable?: (table: any) => any
+export interface TableFeature<
+  TData extends RowData,
+  TValue extends CellData,
+  TFeatures extends Array<TableFeature<TData, TValue, TFeatures>>,
+> {
+  createCell?: (
+    cell: CoreCell<TData, TValue>,
+    column: CoreColumn<TData, TValue>,
+    row: CoreRow<TData>,
+    table: CoreTable<TData, TValue, TFeatures>
+  ) => CoreCell<TData, TValue, TFeatures>
+  createColumn?: (
+    column: CoreColumn<TData, TValue>,
+    table: CoreTable<TData, TValue, TFeatures>
+  ) => any
+  createHeader?: (
+    column: CoreColumn<TData, TValue>,
+    table: CoreTable<TData, TValue, TFeatures>
+  ) => any
+  createRow?: (
+    row: CoreRow<TData>,
+    table: CoreTable<TData, TValue, TFeatures>
+  ) => any
+  createTable?: (table: CoreTable<TData, TValue, TFeatures>) => any
   getDefaultColumnDef?: () => any
-  getDefaultOptions?: (table: any) => any
+  getDefaultOptions?: (table: CoreTable<TData, TValue, TFeatures>) => any
   getInitialState?: (initialState?: InitialTableState) => any
 }
 
@@ -68,7 +88,12 @@ const features = [
 
 export interface CoreTableState {}
 
-export interface CoreOptions<TData extends RowData> {
+export interface CoreTableOptions<
+  TData extends RowData,
+  TValue extends CellData,
+  TFeatures extends Array<TableFeature<TData, TValue, TFeatures>>,
+> {
+  _features: TFeatures
   /**
    * Set this option to override any of the `autoReset...` feature options.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#autoresetall)
@@ -122,7 +147,7 @@ export interface CoreOptions<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#defaultcolumn)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  defaultColumn?: Partial<ColumnDef<TData, unknown>>
+  defaultColumn?: Partial<ColumnDef<TData, TValue>>
   /**
    * This required option is a factory for a function that computes and returns the core row model for the table.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getcorerowmodel)
@@ -188,12 +213,16 @@ export interface CoreOptions<TData extends RowData> {
   state: Partial<TableState>
 }
 
-export interface CoreTable<TData extends RowData> {
-  _features: readonly TableFeature[]
-  _getAllFlatColumnsById: () => Record<string, Column<TData, unknown>>
-  _getColumnDefs: () => ColumnDef<TData, unknown>[]
+export interface CoreTable<
+  TData extends RowData,
+  TValue extends CellData,
+  TFeatures extends Array<TableFeature<TData, TValue, TFeatures>>,
+> {
+  _features: TFeatures
+  _getAllFlatColumnsById: () => Record<string, Column<TData, TValue>>
+  _getColumnDefs: () => ColumnDef<TData, TValue>[]
   _getCoreRowModel?: () => RowModel<TData>
-  _getDefaultColumnDef: () => Partial<ColumnDef<TData, unknown>>
+  _getDefaultColumnDef: () => Partial<ColumnDef<TData, TValue>>
   _getRowId: (_: TData, index: number, parent?: Row<TData>) => string
   _queue: (cb: () => void) => void
   /**
@@ -201,25 +230,25 @@ export interface CoreTable<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getallcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getAllColumns: () => Column<TData, unknown>[]
+  getAllColumns: () => Column<TData, TValue>[]
   /**
    * Returns all columns in the table flattened to a single level.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getallflatcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getAllFlatColumns: () => Column<TData, unknown>[]
+  getAllFlatColumns: () => Column<TData, TValue>[]
   /**
    * Returns all leaf-node columns in the table flattened to a single level. This does not include parent columns.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getallleafcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getAllLeafColumns: () => Column<TData, unknown>[]
+  getAllLeafColumns: () => Column<TData, TValue>[]
   /**
    * Returns a single column by its ID.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getcolumn)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getColumn: (columnId: string) => Column<TData, unknown> | undefined
+  getColumn: (columnId: string) => Column<TData, TValue> | undefined
   /**
    * Returns the core row model before any processing has been applied.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getcorerowmodel)
@@ -276,14 +305,20 @@ export interface CoreTable<TData extends RowData> {
   setState: (updater: Updater<TableState>) => void
 }
 
-export function createTable<TData extends RowData>(
-  options: TableOptionsResolved<TData>
-): Table<TData> {
+export function createTable<
+  TData extends RowData,
+  TValue extends CellData,
+  TFeatures extends Array<TableFeature<TData, TValue, TFeatures>>,
+>(options: TableOptionsResolved<TData>): CoreTable<TData, TValue, TFeatures> {
   if (options.debugAll || options.debugTable) {
     console.info('Creating Table Instance...')
   }
 
-  let table = { _features: features } as unknown as Table<TData>
+  let table = { _features: options._features } as CoreTable<
+    TData,
+    TValue,
+    TFeatures
+  >
 
   const defaultOptions = table._features.reduce((obj, feature) => {
     return Object.assign(obj, feature.getDefaultOptions?.(table))
@@ -314,8 +349,8 @@ export function createTable<TData extends RowData>(
   const queued: (() => void)[] = []
   let queuedTimeout = false
 
-  const coreInstance: CoreTable<TData> = {
-    _features: features,
+  const coreInstance: CoreTable<TData, TValue, TFeatures> = {
+    _features: table.options._features,
     options: {
       ...defaultOptions,
       ...options,
@@ -410,17 +445,14 @@ export function createTable<TData extends RowData>(
       () => [table._getColumnDefs()],
       columnDefs => {
         const recurseColumns = (
-          columnDefs: ColumnDef<TData, unknown>[],
-          parent?: Column<TData, unknown>,
+          columnDefs: ColumnDef<TData, TValue>[],
+          parent?: Column<TData, TValue>,
           depth = 0
-        ): Column<TData, unknown>[] => {
+        ): Column<TData, TValue>[] => {
           return columnDefs.map(columnDef => {
             const column = createColumn(table, columnDef, depth, parent)
 
-            const groupingColumnDef = columnDef as GroupColumnDef<
-              TData,
-              unknown
-            >
+            const groupingColumnDef = columnDef as GroupColumnDef<TData, TValue>
 
             column.columns = groupingColumnDef.columns
               ? recurseColumns(groupingColumnDef.columns, column, depth + 1)
@@ -457,7 +489,7 @@ export function createTable<TData extends RowData>(
             acc[column.id] = column
             return acc
           },
-          {} as Record<string, Column<TData, unknown>>
+          {} as Record<string, Column<TData, TValue>>
         )
       },
       {

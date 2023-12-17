@@ -9,17 +9,19 @@ import { RowData, Updater } from '../types'
 import { functionalUpdate } from '../utils'
 
 //row models
-export function getTablePrePaginationRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTablePrePaginationRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return table.getExpandedRowModel()
 }
 
-export function getTablePaginationRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTablePaginationRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   if (!table._getPaginationRowModel && table.options.getPaginationRowModel) {
     table._getPaginationRowModel = table.options.getPaginationRowModel(table)
   }
@@ -32,10 +34,13 @@ export function getTablePaginationRowModel<
 }
 
 //table functions
-export function setTablePaginationState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, updater }: { table: TTable; updater: Updater<PaginationState> }) {
+export function setTablePaginationState<TData extends RowData>({
+  table,
+  updater,
+}: {
+  table: CoreTable<TData>
+  updater: Updater<PaginationState>
+}) {
   const safeUpdater: Updater<PaginationState> = old => {
     let newState = functionalUpdate(updater, old)
 
@@ -45,10 +50,13 @@ export function setTablePaginationState<
   return table.options.onPaginationChange?.(safeUpdater)
 }
 
-export function resetTablePaginationState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ defaultState, table }: { defaultState?: boolean; table: TTable }) {
+export function resetTablePaginationState<TData extends RowData>({
+  defaultState,
+  table,
+}: {
+  defaultState?: boolean
+  table: CoreTable<TData>
+}) {
   setTablePaginationState({
     table,
     updater: defaultState
@@ -57,10 +65,13 @@ export function resetTablePaginationState<
   })
 }
 
-export function setTablePageIndex<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, updater }: { table: TTable; updater: Updater<number> }) {
+export function setTablePageIndex<TData extends RowData>({
+  table,
+  updater,
+}: {
+  table: CoreTable<TData>
+  updater: Updater<number>
+}) {
   setTablePaginationState({
     table,
     updater: old => {
@@ -82,10 +93,13 @@ export function setTablePageIndex<
   })
 }
 
-export function setTablePageSize<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, updater }: { table: TTable; updater: Updater<number> }) {
+export function setTablePageSize<TData extends RowData>({
+  table,
+  updater,
+}: {
+  table: CoreTable<TData>
+  updater: Updater<number>
+}) {
   setTablePaginationState({
     table,
     updater: old => {
@@ -102,10 +116,13 @@ export function setTablePageSize<
   })
 }
 
-export function resetTablePageIndex<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ defaultState, table }: { defaultState?: boolean; table: TTable }) {
+export function resetTablePageIndex<TData extends RowData>({
+  defaultState,
+  table,
+}: {
+  defaultState?: boolean
+  table: CoreTable<TData>
+}) {
   setTablePageIndex({
     table,
     updater: defaultState
@@ -114,10 +131,13 @@ export function resetTablePageIndex<
   })
 }
 
-export function resetTablePageSize<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ defaultState, table }: { defaultState?: boolean; table: TTable }) {
+export function resetTablePageSize<TData extends RowData>({
+  defaultState,
+  table,
+}: {
+  defaultState?: boolean
+  table: CoreTable<TData>
+}) {
   setTablePageSize({
     table,
     updater: defaultState
@@ -126,10 +146,13 @@ export function resetTablePageSize<
   })
 }
 
-export function setTablePageCount<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, updater }: { table: TTable; updater: Updater<number> }) {
+export function setTablePageCount<TData extends RowData>({
+  table,
+  updater,
+}: {
+  table: CoreTable<TData>
+  updater: Updater<number>
+}) {
   setTablePaginationState({
     table,
     updater: old => {
@@ -150,10 +173,11 @@ export function setTablePageCount<
   })
 }
 
-export function getTablePageCount<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTablePageCount<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return (
     table.options.pageCount ??
     Math.ceil(
@@ -163,10 +187,13 @@ export function getTablePageCount<
   )
 }
 
-export function getTablePageOptions<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, pageCount }: { table: TTable; pageCount?: number }) {
+export function getTablePageOptions<TData extends RowData>({
+  table,
+  pageCount,
+}: {
+  table: CoreTable<TData>
+  pageCount?: number
+}) {
   let pageOptions: number[] = []
   if (pageCount && pageCount > 0) {
     pageOptions = [...new Array(pageCount)].fill(null).map((_, i) => i)
@@ -174,17 +201,19 @@ export function getTablePageOptions<
   return pageOptions
 }
 
-export function getTableCanPreviousPage<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableCanPreviousPage<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return table.getState().pagination.pageIndex > 0
 }
 
-export function getTableCanNextPage<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableCanNextPage<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   const { pageIndex } = table.getState().pagination
 
   const pageCount = getTablePageCount({ table })
@@ -200,40 +229,44 @@ export function getTableCanNextPage<
   return pageIndex < pageCount - 1
 }
 
-export function goTablePreviousPage<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function goTablePreviousPage<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   setTablePageIndex({
     table,
     updater: old => old - 1,
   })
 }
 
-export function goTableNextPage<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function goTableNextPage<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   setTablePageIndex({
     table,
     updater: old => old + 1,
   })
 }
 
-export function goTableFirstPage<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function goTableFirstPage<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   setTablePageIndex({
     table,
     updater: () => 0,
   })
 }
 
-export function goTableLastPage<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function goTableLastPage<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   setTablePageIndex({
     table,
     updater: () => getTablePageCount({ table }) - 1,

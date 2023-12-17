@@ -1,4 +1,4 @@
-import { CoreOptions, CoreTableState, CoreTable } from './core/table'
+import { CoreTableOptions, CoreTableState, CoreTable } from './core/table'
 import {
   VisibilityInstance,
   VisibilityTableState,
@@ -102,7 +102,7 @@ export type OnChangeFn<T> = (updaterOrValue: Updater<T>) => void
 
 export type RowData = Record<string, any>
 
-export type CellData = any
+export type CellData = unknown
 
 export type AnyRender = (Comp: any, props: any) => any
 
@@ -134,8 +134,8 @@ interface FeatureOptions<TData extends RowData>
     PaginationOptions,
     RowSelectionOptions<TData> {}
 
-export type TableOptionsResolved<TData extends RowData> = CoreOptions<TData> &
-  FeatureOptions<TData>
+export type TableOptionsResolved<TData extends RowData> =
+  CoreTableOptions<TData> & FeatureOptions<TData>
 
 export interface TableOptions<TData extends RowData>
   extends PartialKeys<

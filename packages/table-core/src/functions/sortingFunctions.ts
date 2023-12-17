@@ -6,17 +6,19 @@ import { CellData, RowData } from '../types'
 import { isFunction } from '../utils'
 
 //row models
-export function getTablePreSortedRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTablePreSortedRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return table.getGroupedRowModel()
 }
 
-export function getTableSortedRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableSortedRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   if (!table._getSortedRowModel && table.options.getSortedRowModel) {
     table._getSortedRowModel = table.options.getSortedRowModel(table)
   }
@@ -29,17 +31,23 @@ export function getTableSortedRowModel<
 }
 
 //table functions
-export function setTableSortingState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, updater }: { table: TTable; updater: SortingState }) {
+export function setTableSortingState<TData extends RowData>({
+  table,
+  updater,
+}: {
+  table: CoreTable<TData>
+  updater: SortingState
+}) {
   return table.options.onSortingChange?.(updater)
 }
 
-export function resetTableSortingState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ defaultState, table }: { defaultState?: boolean; table: TTable }) {
+export function resetTableSortingState<TData extends RowData>({
+  defaultState,
+  table,
+}: {
+  defaultState?: boolean
+  table: CoreTable<TData>
+}) {
   setTableSortingState({
     table,
     updater: defaultState ? [] : table.initialState?.sorting ?? [],
@@ -51,9 +59,13 @@ export function resetTableSortingState<
 export function getColumnAutoSortingFn<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   const firstRows = table.getFilteredRowModel().flatRows.slice(10)
 
   let isString = false
@@ -84,9 +96,13 @@ export function getColumnAutoSortingFn<
 export function getColumnAutoSortDir<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   const firstRow = table.getFilteredRowModel().flatRows[0]
 
   const value = firstRow?.getValue(column.id)
@@ -101,9 +117,13 @@ export function getColumnAutoSortDir<
 export function getColumnSortingFn<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   if (!column) {
     throw new Error()
   }
@@ -119,18 +139,16 @@ export function getColumnSortingFn<
 export function toggleColumnSorting<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
 >({
   column,
   desc,
   multi,
   table,
 }: {
-  column: TColumn
+  column: CoreColumn<TData, TValue>
   desc?: boolean
   multi?: boolean
-  table: TTable
+  table: CoreTable<TData>
 }) {
   const nextSortingOrder = column.getNextSortingOrder()
   const hasManualValue = typeof desc !== 'undefined' && desc !== null
@@ -221,9 +239,13 @@ export function toggleColumnSorting<
 export function getColumnFirstSortDir<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   const sortDescFirst =
     column.columnDef.sortDescFirst ??
     table.options.sortDescFirst ??
@@ -234,16 +256,14 @@ export function getColumnFirstSortDir<
 export function getColumnNextSortingOrder<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
 >({
   column,
   multi,
   table,
 }: {
-  column: TColumn
+  column: CoreColumn<TData, TValue>
   multi?: boolean
-  table: TTable
+  table: CoreTable<TData>
 }) {
   const firstSortDirection = getColumnFirstSortDir({ column, table })
   const isSorted = getColumnIsSorted({ column, table })
@@ -265,9 +285,13 @@ export function getColumnNextSortingOrder<
 export function getColumnCanSort<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   return (
     (column.columnDef.enableSorting ?? true) &&
     (table.options.enableSorting ?? true) &&
@@ -278,9 +302,13 @@ export function getColumnCanSort<
 export function getColumnCanMultiSort<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   return (
     column.columnDef.enableMultiSort ??
     table.options.enableMultiSort ??
@@ -291,9 +319,13 @@ export function getColumnCanMultiSort<
 export function getColumnIsSorted<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   const columnSort = table.getState().sorting?.find(d => d.id === column.id)
   return !columnSort ? false : columnSort.desc ? 'desc' : 'asc'
 }
@@ -301,18 +333,26 @@ export function getColumnIsSorted<
 export function getColumnSortIndex<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   table.getState().sorting?.findIndex(d => d.id === column.id) ?? -1
 }
 
 export function clearColumnSorting<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   //clear sorting for just 1 column
   setTableSortingState({
     table,
@@ -323,9 +363,13 @@ export function clearColumnSorting<
 export function getColumnToggleSortingHandler<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, table }: { column: TColumn; table: TTable }) {
+>({
+  column,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  table: CoreTable<TData>
+}) {
   // const canSort = column.getCanSort()
   const canSort = getColumnCanSort({ column, table })
 

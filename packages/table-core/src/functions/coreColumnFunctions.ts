@@ -5,10 +5,9 @@ import { _getTableOrderColumnsFn } from './orderingFunctions'
 export function getColumnFlatColumns<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>
->({ column }: { column: TColumn }) {
+>({ column }: { column: CoreColumn<TData, TValue> }) {
   return [
-    column as TColumn,
+    column as CoreColumn<TData, TValue>,
     ...column.columns?.flatMap(d => d.getFlatColumns()),
   ]
 }
@@ -16,8 +15,11 @@ export function getColumnFlatColumns<
 export function getColumnLeafColumns<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>
->({ column }: { column: TColumn }): TColumn[] {
+>({
+  column,
+}: {
+  column: CoreColumn<TData, TValue>
+}): CoreColumn<TData, TValue>[] {
   if (column.columns?.length) {
     let leafColumns = column.columns.flatMap(column =>
       getColumnLeafColumns({ column })
@@ -26,5 +28,5 @@ export function getColumnLeafColumns<
     return _getTableOrderColumnsFn({ columns: leafColumns })
   }
 
-  return [column as TColumn]
+  return [column as CoreColumn<TData, TValue>]
 }

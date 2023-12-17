@@ -6,17 +6,19 @@ import { getTableRow } from './coreTableFunctions'
 import { getTablePrePaginationRowModel } from './paginationFunctions'
 
 //row models
-export function getTablePreExpandedRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTablePreExpandedRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return table.getSortedRowModel()
 }
 
-export function getTableExpandedRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableExpandedRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   if (!table._getExpandedRowModel && table.options.getExpandedRowModel) {
     table._getExpandedRowModel = table.options.getExpandedRowModel(table)
   }
@@ -29,27 +31,36 @@ export function getTableExpandedRowModel<
 }
 
 //table functions
-export function setTableExpandedState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, updater }: { table: TTable; updater: Updater<ExpandedState> }) {
+export function setTableExpandedState<TData extends RowData>({
+  table,
+  updater,
+}: {
+  table: CoreTable<TData>
+  updater: Updater<ExpandedState>
+}) {
   return table.options.onExpandedChange?.(updater)
 }
 
-export function resetTableExpandedState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ defaultState, table }: { defaultState?: boolean; table: TTable }) {
+export function resetTableExpandedState<TData extends RowData>({
+  defaultState,
+  table,
+}: {
+  defaultState?: boolean
+  table: CoreTable<TData>
+}) {
   setTableExpandedState({
     table,
     updater: defaultState ? true : table.initialState.expanded ?? {},
   })
 }
 
-export function toggleTableAllRowsExpanded<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table, expanded }: { expanded?: boolean; table: TTable }) {
+export function toggleTableAllRowsExpanded<TData extends RowData>({
+  table,
+  expanded,
+}: {
+  expanded?: boolean
+  table: CoreTable<TData>
+}) {
   if (expanded ?? !getIsAllRowsExpanded({ table })) {
     setTableExpandedState({ table, updater: true })
   } else {
@@ -57,37 +68,41 @@ export function toggleTableAllRowsExpanded<
   }
 }
 
-export function getTableCanSomeRowsExpand<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableCanSomeRowsExpand<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return getTablePrePaginationRowModel({ table }).flatRows.some(row =>
     row.getCanExpand()
   )
 }
 
-export function getToggleAllRowsExpandedHandler<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getToggleAllRowsExpandedHandler<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return (e: unknown) => {
     ;(e as any).persist?.()
     toggleTableAllRowsExpanded({ table })
   }
 }
 
-export function getIsSomeRowsExpanded<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getIsSomeRowsExpanded<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   const expanded = table.getState().expanded
   return expanded === true || Object.values(expanded).some(Boolean)
 }
 
-export function getIsAllRowsExpanded<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getIsAllRowsExpanded<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   const expanded = table.getState().expanded
 
   // If expanded is true, save some cycles and return true
@@ -108,10 +123,11 @@ export function getIsAllRowsExpanded<
   return true
 }
 
-export function getTableExpandedDepth<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableExpandedDepth<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   let maxDepth = 0
 
   const rowIds =
@@ -128,11 +144,15 @@ export function getTableExpandedDepth<
 }
 
 //row functions
-export function toggleRowExpanded<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table, expanded }: { row: TRow; table: TTable; expanded?: boolean }) {
+export function toggleRowExpanded<TData extends RowData>({
+  row,
+  table,
+  expanded,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+  expanded?: boolean
+}) {
   setTableExpandedState({
     table,
     updater: old => {
@@ -167,11 +187,13 @@ export function toggleRowExpanded<
   })
 }
 
-export function getIsRowExpanded<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table }: { row: TRow; table: TTable }) {
+export function getIsRowExpanded<TData extends RowData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}) {
   const expanded = table.getState().expanded
 
   return !!(
@@ -180,22 +202,26 @@ export function getIsRowExpanded<
   )
 }
 
-export function getRowCanExpand<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table }: { row: TRow; table: TTable }) {
+export function getRowCanExpand<TData extends RowData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}) {
   return (
     table.options.getRowCanExpand?.(row) ??
     ((table.options.enableExpanding ?? true) && !!row.subRows?.length)
   )
 }
 
-export function getIsAllRowParentsExpanded<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table }: { row: TRow; table: TTable }) {
+export function getIsAllRowParentsExpanded<TData extends RowData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}) {
   let isFullyExpanded = true
   let currentRow = row
 
@@ -211,11 +237,13 @@ export function getIsAllRowParentsExpanded<
   return isFullyExpanded
 }
 
-export function getRowToggleExpandedHandler<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table }: { row: TRow; table: TTable }) {
+export function getRowToggleExpandedHandler<TData extends RowData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}) {
   const canExpand = getRowCanExpand({ row, table })
   return () => {
     if (!canExpand) return

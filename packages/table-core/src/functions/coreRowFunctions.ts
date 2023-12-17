@@ -8,9 +8,7 @@ import { flattenBy } from '../utils'
 export function getRowValue<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
->({ column, row }: { column: TColumn; row: TRow }) {
+>({ column, row }: { column: CoreColumn<TData, TValue>; row: CoreRow<TData> }) {
   const columnId = column.id
   if (row._valuesCache.hasOwnProperty(columnId)) {
     return row._valuesCache[columnId]
@@ -31,9 +29,7 @@ export function getRowValue<
 export function getUniqueRowValues<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
->({ column, row }: { column: TColumn; row: TRow }) {
+>({ column, row }: { column: CoreColumn<TData, TValue>; row: CoreRow<TData> }) {
   const columnId = column.id
   if (row._uniqueValuesCache.hasOwnProperty(columnId)) {
     return row._uniqueValuesCache[columnId]
@@ -59,34 +55,44 @@ export function getUniqueRowValues<
 export function renderRowValue<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ column, row, table }: { column: TColumn; row: TRow; table: TTable }) {
+>({
+  column,
+  row,
+  table,
+}: {
+  column: CoreColumn<TData, TValue>
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}) {
   return row.getValue(column.id) ?? table.options.renderFallbackValue
 }
 
-export function getRowLeafRows<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
->({ row }: { row: TRow }): TRow[] {
+export function getRowLeafRows<TData extends RowData>({
+  row,
+}: {
+  row: CoreRow<TData>
+}): CoreRow<TData>[] {
   return flattenBy(row.subRows, d => d.subRows)
 }
 
-export function getRowParentRow<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table }: { row: TRow; table: TTable }): TRow | undefined {
+export function getRowParentRow<TData extends RowData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}): CoreRow<TData> | undefined {
   return row.parentId ? table.getRow(row.parentId, true) : undefined
 }
 
-export function getRowParentRows<
-  TData extends RowData,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ row, table }: { row: TRow; table: TTable }): TRow[] {
-  let parentRows: TRow[] = []
+export function getRowParentRows<TData extends RowData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}): CoreRow<TData>[] {
+  let parentRows: CoreRow<TData>[] = []
   let currentRow = row
   while (true) {
     const parentRow = getRowParentRow({ row: currentRow, table })
@@ -101,17 +107,14 @@ export function getAllRowCells<
   TData extends RowData,
   TValue extends CellData = CellData,
   TCell extends CoreCell<TData, TValue> = CoreCell<TData, TValue>,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
 >({
   leafColumns,
   row,
   table,
 }: {
-  leafColumns: TColumn[]
-  row: TRow
-  table: TTable
+  leafColumns: CoreColumn<TData, TValue>[]
+  row: CoreRow<TData>
+  table: CoreTable<TData>
 }): TCell[] {
   return leafColumns.map(column => {
     return createCell(table, row, column)

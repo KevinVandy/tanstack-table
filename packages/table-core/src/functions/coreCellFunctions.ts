@@ -8,9 +8,13 @@ import { getRowValue } from './coreRowFunctions'
 export function getCellValue<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TRow extends CoreRow<TData> = CoreRow<TData>,
->({ column, row }: { row: TRow; column: TColumn }): TValue {
+>({
+  column,
+  row,
+}: {
+  row: CoreRow<TData>
+  column: CoreColumn<TData, TValue>
+}): TValue {
   return getRowValue({ column, row })
 }
 
@@ -18,8 +22,7 @@ export function renderCellValue<
   TData extends RowData,
   TValue extends CellData = CellData,
   TCell extends CoreCell<TData, TValue> = CoreCell<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ cell, table }: { cell: TCell; table: TTable }) {
+>({ cell, table }: { cell: TCell; table: CoreTable<TData> }) {
   return (
     getCellValue({ row: cell.row, columnId: cell.column.id }) ??
     table?.options?.renderFallbackValue
@@ -30,8 +33,7 @@ export function getCellContext<
   TData extends RowData,
   TValue extends CellData = CellData,
   TCell extends CoreCell<TData, TValue> = CoreCell<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ cell, table }: { cell: TCell; table: TTable }) {
+>({ cell, table }: { cell: TCell; table: CoreTable<TData> }) {
   return {
     table,
     column: cell.column,

@@ -1,4 +1,4 @@
-import { RowData, Column, Header, HeaderGroup, Table } from '../types'
+import { RowData, Column, Header, HeaderGroup, Table, CellData } from '../types'
 import { memo } from '../utils'
 import { TableFeature } from './table'
 
@@ -8,7 +8,7 @@ export interface CoreHeaderGroup<TData extends RowData> {
   id: string
 }
 
-export interface HeaderContext<TData, TValue> {
+export interface HeaderContext<TData extends RowData, TValue extends CellData> {
   /**
    * An instance of a column.
    */
@@ -23,7 +23,7 @@ export interface HeaderContext<TData, TValue> {
   table: Table<TData>
 }
 
-export interface CoreHeader<TData extends RowData, TValue> {
+export interface CoreHeader<TData extends RowData, TValue extends CellData> {
   /**
    * The col-span for the header.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/header#colspan)

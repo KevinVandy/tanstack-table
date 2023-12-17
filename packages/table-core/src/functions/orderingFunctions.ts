@@ -6,14 +6,20 @@ import { CellData, RowData } from '../types'
 export function _getTableOrderColumnsFn<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue>,
+  CoreColumn<TData, TValue> extends CoreColumn<TData, TValue>,
   TTable extends CoreTable<TData>,
->({ columns, table }: { columns: TColumn[]; table: TTable }): TColumn[] {
+>({
+  columns,
+  table,
+}: {
+  columns: CoreColumn<TData, TValue>[]
+  table: CoreTable<TData>
+}): CoreColumn<TData, TValue>[] {
   const { groupedColumnMode } = table.options
   const { columnOrder, grouping } = table.getState()
   // Sort grouped columns to the start of the column list
   // before the headers are built
-  let orderedColumns: TColumn[] = []
+  let orderedColumns: CoreColumn<TData, TValue>[] = []
 
   // If there is no order, return the normal columns
   if (!columnOrder?.length) {

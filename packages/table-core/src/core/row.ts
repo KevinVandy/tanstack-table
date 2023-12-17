@@ -11,17 +11,15 @@ import {
 import { RowData, Cell, Row, Table, CellData } from '../types'
 import { memo } from '../utils'
 import { CoreCell } from './cell'
+import { CoreTable } from './table'
 
 // row instance types
 export interface CoreRow<
   TData extends RowData,
-  TValue extends CellData = CellData,
-  TCell extends CoreCell<TData, TValue> = CoreCell<TData, TValue>,
-  TRow extends Row<TData> = Row<TData>
 > {
   _getAllCellsByColumnId: () => Record<string, Cell<TData, unknown>>
-  _uniqueValuesCache: Record<string, TValue>
-  _valuesCache: Record<string, TValue>
+  _uniqueValuesCache: Record<string, unknown>
+  _valuesCache: Record<string, unknown>
   /**
    * The depth of the row (if nested or grouped) relative to the root row array.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#depth)
@@ -33,25 +31,25 @@ export interface CoreRow<
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getallcells)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getAllCells: () => TCell[]
+  getAllCells: () => CoreCell<TData, unknown>[]
   /**
    * Returns the leaf rows for the row, not including any parent rows.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getleafrows)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getLeafRows: () => TRow[]
+  getLeafRows: () => CoreRow<TData>[]
   /**
    * Returns the parent row for the row, if it exists.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getparentrow)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getParentRow: () => TRow | undefined
+  getParentRow: () => CoreRow<TData> | undefined
   /**
    * Returns the parent rows for the row, all the way up to a root row.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getparentrows)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  getParentRows: () => TRow[]
+  getParentRows: () => CoreRow<TData>[]
   /**
    * Returns a unique array of values from the row for a given columnId.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#getuniquevalues)
@@ -105,12 +103,12 @@ export interface CoreRow<
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/row#subrows)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/rows)
    */
-  subRows: TRow[]
+  subRows: CoreRow<TData>[]
 }
 
 // row instance creation
 export const createRow = <TData extends RowData>(
-  table: Table<TData>,
+  table: CoreTable<TData>,
   id: string,
   original: TData,
   rowIndex: number,
@@ -135,7 +133,7 @@ export const createRow = <TData extends RowData>(
       renderRowValue({ row: row as Row<TData>, columnId, table }),
     getLeafRows: () => getRowLeafRows({ row }),
     getParentRow: () => getRowParentRow({ row, table }),
-    getParentRows: () => getRowParentRows({ row }),
+    getParentRows: () => getRowParentRows({ row, table }),
     getAllCells: memo(
       () => [table.getAllLeafColumns()],
       leafColumns =>

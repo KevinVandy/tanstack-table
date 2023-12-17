@@ -13,15 +13,12 @@ import {
 } from '../types'
 import { getRowParentRow } from './coreRowFunctions'
 
-export function mergeTableOptions<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({
+export function mergeTableOptions<TData extends RowData>({
   table,
   defaultOptions,
   options,
 }: {
-  table: TTable
+  table: CoreTable<TData>
   defaultOptions: TableOptionsResolved<TData>
   options: Partial<TableOptionsResolved<TData>>
 }) {
@@ -35,21 +32,19 @@ export function mergeTableOptions<
   }
 }
 
-export function resetTable<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function resetTable<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   table.setState(table.initialState)
 }
 
-export function setTableOptions<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({
+export function setTableOptions<TData extends RowData>({
   defaultOptions,
   table,
 }: {
-  table: TTable
+  table: CoreTable<TData>
   defaultOptions: TableOptionsResolved<TData>
 }) {
   const newOptions = functionalUpdate(updater, table.options)
@@ -60,25 +55,31 @@ export function setTableOptions<
   }) as RequiredKeys<TableOptionsResolved<TData>, 'state'>
 }
 
-export function getTableState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }): TableState {
+export function getTableState<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}): TableState {
   return table.options.state as TableState
 }
 
-export function setTableState<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ updater, table }: { table: TTable; updater: Updater<TableState> }) {
+export function setTableState<TData extends RowData>({
+  updater,
+  table,
+}: {
+  table: CoreTable<TData>
+  updater: Updater<TableState>
+}) {
   table.options.onStateChange?.(updater)
 }
 
-export function _getRowId<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
-  TRow extends TData = TData,
->({ row, table }: { row: TRow; table: TTable }) {
+export function _getRowId<TData extends RowData, CoreRow<TData> extends TData = TData>({
+  row,
+  table,
+}: {
+  row: CoreRow<TData>
+  table: CoreTable<TData>
+}) {
   const parentRow = getRowParentRow({ row, table })
   return (
     table.options.getRowId?.(row.original, row.index, parentRow) ??
@@ -88,9 +89,8 @@ export function _getRowId<
 
 export function getTableCoreRowModel<
   TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
-  TRow extends TData = TData,
->({ table }: { table: TTable }) {
+  CoreRow<TData> extends TData = TData,
+>({ table }: { table: CoreTable<TData> }) {
   if (!table._getCoreRowModel) {
     table._getCoreRowModel = table.options.getCoreRowModel(table)
   }
@@ -98,24 +98,22 @@ export function getTableCoreRowModel<
   return table._getCoreRowModel!()
 }
 
-export function getTableRowModel<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ table }: { table: TTable }) {
+export function getTableRowModel<TData extends RowData>({
+  table,
+}: {
+  table: CoreTable<TData>
+}) {
   return table.getPaginationRowModel()
 }
 
-export function getTableRow<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({
+export function getTableRow<TData extends RowData>({
   rowId,
   searchAll,
   table,
 }: {
   rowId: string
-  searchAll: boolean
-  table: TTable
+  searchAll?: boolean
+  table: CoreTable<TData>
 }) {
   const row = (searchAll ? table.getCoreRowModel() : table.getRowModel())
     .rowsById[rowId]
@@ -130,15 +128,12 @@ export function getTableRow<
   return row
 }
 
-export function _getTableDefaultColumnDef<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({
+export function _getTableDefaultColumnDef<TData extends RowData>({
   defaultColumn,
   table,
 }: {
   defaultColumn?: Partial<ColumnDef<TData, unknown>>
-  table: TTable
+  table: CoreTable<TData>
 }) {
   defaultColumn = (defaultColumn ?? {}) as Partial<ColumnDef<TData, unknown>>
 
@@ -169,20 +164,19 @@ export function _getTableDefaultColumnDef<
 export function getAllTableColumns<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
+  
 >({
   columnDefs,
   table,
 }: {
   columnDefs: ColumnDef<TData, TValue>[]
-  table: TTable
-}): TColumn[] {
+  table: CoreTable<TData>
+}): CoreColumn<TData, TValue>[] {
   const recurseColumns = (
     columnDefs: ColumnDef<TData, unknown>[],
-    parent?: TColumn,
+    parent?: CoreColumn<TData, TValue>,
     depth = 0
-  ): TColumn[] => {
+  ): CoreColumn<TData, TValue>[] => {
     return columnDefs.map(columnDef => {
       const column = createColumn(table, columnDef, depth, parent)
 
@@ -202,9 +196,8 @@ export function getAllTableColumns<
 export function getAllTableFlatColumns<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ allColumns }: { allColumns: TColumn[]; table: TTable }) {
+  
+>({ allColumns }: { allColumns: CoreColumn<TData, TValue>[]; table: CoreTable<TData> }) {
   return allColumns.flatMap(column => {
     return column.getFlatColumns()
   })
@@ -213,32 +206,33 @@ export function getAllTableFlatColumns<
 export function _getAllTableFlatColumnsById<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ flatColumns }: { flatColumns: TColumn[]; table: TTable }) {
+  
+>({ flatColumns }: { flatColumns: CoreColumn<TData, TValue>[]; table: CoreTable<TData> }) {
   return flatColumns.reduce(
     (acc, column) => {
       acc[column.id] = column
       return acc
     },
-    {} as Record<string, TColumn>
+    {} as Record<string, CoreColumn<TData, TValue>>
   )
 }
 
 export function getAllTableLeafColumns<
   TData extends RowData,
   TValue extends CellData = CellData,
-  TColumn extends CoreColumn<TData, TValue> = CoreColumn<TData, TValue>,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ allColumns }: { allColumns: TColumn[]; table: TTable }) {
+  
+>({ allColumns }: { allColumns: CoreColumn<TData, TValue>[]; table: CoreTable<TData> }) {
   let leafColumns = allColumns.flatMap(column => column.getLeafColumns())
   return orderColumns(leafColumns)
 }
 
-export function getTableColumn<
-  TData extends RowData,
-  TTable extends CoreTable<TData> = CoreTable<TData>,
->({ columnId, table }: { table: TTable; columnId: string }) {
+export function getTableColumn<TData extends RowData>({
+  columnId,
+  table,
+}: {
+  table: CoreTable<TData>
+  columnId: string
+}) {
   const column = table._getAllFlatColumnsById()[columnId]
 
   if (process.env.NODE_ENV !== 'production' && !column) {
