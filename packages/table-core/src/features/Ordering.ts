@@ -44,7 +44,7 @@ export interface ColumnOrderInstance<TData extends RowData> {
 
 //
 
-export const Ordering: TableFeature = {
+export const Ordering: TableFeature<any> = {
   getInitialState: (state): ColumnOrderTableState => {
     return {
       columnOrder: [],

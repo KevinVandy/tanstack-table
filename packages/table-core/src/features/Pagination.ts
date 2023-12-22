@@ -159,7 +159,7 @@ const getDefaultPaginationState = (): PaginationState => ({
   pageSize: defaultPageSize,
 })
 
-export const Pagination: TableFeature = {
+export const Pagination: TableFeature<any> = {
   getInitialState: (state): PaginationTableState => {
     return {
       ...state,

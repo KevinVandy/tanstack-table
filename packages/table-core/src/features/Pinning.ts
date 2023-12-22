@@ -260,7 +260,7 @@ const getDefaultRowPinningState = (): RowPinningState => ({
   bottom: [],
 })
 
-export const Pinning: TableFeature = {
+export const Pinning: TableFeature<any> = {
   getInitialState: (state): ColumnPinningTableState & RowPinningState => {
     return {
       columnPinning: getDefaultColumnPinningState(),

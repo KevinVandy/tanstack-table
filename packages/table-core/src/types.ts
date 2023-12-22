@@ -1,4 +1,4 @@
-import { CoreOptions, CoreTableState, CoreInstance } from './core/table'
+import { CoreOptions, CoreTableState, CoreTable } from './core/table'
 import {
   VisibilityInstance,
   VisibilityTableState,
@@ -102,10 +102,12 @@ export type OnChangeFn<T> = (updaterOrValue: Updater<T>) => void
 
 export type RowData = unknown | object | any[]
 
+export type CellValue = unknown
+
 export type AnyRender = (Comp: any, props: any) => any
 
 export interface Table<TData extends RowData>
-  extends CoreInstance<TData>,
+  extends CoreTable<TData>,
     HeadersInstance<TData>,
     VisibilityInstance<TData>,
     ColumnOrderInstance<TData>,
@@ -265,8 +267,10 @@ export type AccessorFnColumnDef<
   TValue = unknown,
 > = AccessorFnColumnDefBase<TData, TValue> & ColumnIdentifiers<TData, TValue>
 
-export interface AccessorKeyColumnDefBase<TData extends RowData, TValue = unknown>
-  extends ColumnDefBase<TData, TValue> {
+export interface AccessorKeyColumnDefBase<
+  TData extends RowData,
+  TValue = unknown,
+> extends ColumnDefBase<TData, TValue> {
   id?: string
   accessorKey: (string & {}) | keyof TData
 }

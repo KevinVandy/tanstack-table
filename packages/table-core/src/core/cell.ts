@@ -1,13 +1,16 @@
-import { RowData, Cell, Column, Row, Table } from '../types'
+import { CellValue, RowData } from '../types'
 import { Getter, memo } from '../utils'
+import { CoreColumn } from './column'
+import { CoreRow } from './row'
+import { CoreTable } from './table'
 
 export interface CellContext<TData extends RowData, TValue> {
-  cell: Cell<TData, TValue>
-  column: Column<TData, TValue>
+  cell: CoreCell<TData, TValue>
+  column: CoreColumn<TData, TValue>
   getValue: Getter<TValue>
   renderValue: Getter<TValue | null>
-  row: Row<TData>
-  table: Table<TData>
+  row: CoreRow<TData>
+  table: CoreTable<TData>
 }
 
 export interface CoreCell<TData extends RowData, TValue> {
@@ -16,7 +19,7 @@ export interface CoreCell<TData extends RowData, TValue> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/cell#column)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/cells)
    */
-  column: Column<TData, TValue>
+  column: CoreColumn<TData, TValue>
   /**
    * Returns the rendering context (or props) for cell-based components like cells and aggregated cells. Use these props with your framework's `flexRender` utility to render these using the template of your choice:
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/cell#getcontext)
@@ -46,15 +49,14 @@ export interface CoreCell<TData extends RowData, TValue> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/cell#row)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/cells)
    */
-  row: Row<TData>
+  row: CoreRow<TData>
 }
 
-export function createCell<TData extends RowData, TValue>(
-  table: Table<TData>,
-  row: Row<TData>,
-  column: Column<TData, TValue>,
-  columnId: string
-): Cell<TData, TValue> {
+export function createCoreCell<TData extends RowData, TValue extends CellValue>(
+  table: CoreTable<TData>,
+  row: CoreRow<TData>,
+  column: CoreColumn<TData, TValue>
+): CoreCell<TData, TValue> {
   const getRenderValue = () =>
     cell.getValue() ?? table.options.renderFallbackValue
 
@@ -62,7 +64,7 @@ export function createCell<TData extends RowData, TValue>(
     id: `${row.id}_${column.id}`,
     row,
     column,
-    getValue: () => row.getValue(columnId),
+    getValue: () => row.getValue(column.id),
     renderValue: getRenderValue,
     getContext: memo(
       () => [table, column, row, cell],
@@ -70,7 +72,7 @@ export function createCell<TData extends RowData, TValue>(
         table,
         column,
         row,
-        cell: cell as Cell<TData, TValue>,
+        cell: cell as CoreCell<TData, TValue>,
         getValue: cell.getValue,
         renderValue: cell.renderValue,
       }),
@@ -83,12 +85,12 @@ export function createCell<TData extends RowData, TValue>(
 
   table._features.forEach(feature => {
     feature.createCell?.(
-      cell as Cell<TData, TValue>,
+      cell as CoreCell<TData, TValue>,
       column,
-      row as Row<TData>,
+      row as CoreRow<TData>,
       table
     )
   }, {})
 
-  return cell as Cell<TData, TValue>
+  return cell as CoreCell<TData, TValue>
 }

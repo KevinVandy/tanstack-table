@@ -189,7 +189,7 @@ export interface RowSelectionInstance<TData extends RowData> {
 
 //
 
-export const RowSelection: TableFeature = {
+export const RowSelection: TableFeature<any> = {
   getInitialState: (state): RowSelectionTableState => {
     return {
       rowSelection: {},

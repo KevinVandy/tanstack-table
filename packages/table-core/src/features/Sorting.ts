@@ -272,7 +272,7 @@ export interface SortingInstance<TData extends RowData> {
 
 //
 
-export const Sorting: TableFeature = {
+export const Sorting: TableFeature<any> = {
   getInitialState: (state): SortingTableState => {
     return {
       sorting: [],

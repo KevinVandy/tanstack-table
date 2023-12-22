@@ -6,8 +6,6 @@ import {
   TableState,
   Table,
   InitialTableState,
-  Row,
-  Column,
   RowModel,
   ColumnDef,
   TableOptions,
@@ -18,8 +16,8 @@ import {
 } from '../types'
 
 //
-import { createColumn } from './column'
-import { Headers } from './headers'
+import { CoreColumn, createCoreColumn } from './column'
+import { CoreHeader, Headers } from './headers'
 //
 
 import { ColumnSizing } from '../features/ColumnSizing'
@@ -32,37 +30,39 @@ import { Pinning } from '../features/Pinning'
 import { RowSelection } from '../features/RowSelection'
 import { Sorting } from '../features/Sorting'
 import { Visibility } from '../features/Visibility'
+import { CoreCell } from './cell'
+import { CoreRow } from './row'
 
-export interface TableFeature {
-  createCell?: (cell: any, column: any, row: any, table: any) => any
-  createColumn?: (column: any, table: any) => any
-  createHeader?: (column: any, table: any) => any
-  createRow?: (row: any, table: any) => any
-  createTable?: (table: any) => any
-  getDefaultColumnDef?: () => any
-  getDefaultOptions?: (table: any) => any
-  getInitialState?: (initialState?: InitialTableState) => any
+export interface TableFeature<TData extends RowData> {
+  createCell?: (
+    cell: CoreCell<TData, unknown>,
+    column: CoreColumn<TData, unknown>,
+    row: CoreRow<TData>,
+    table: CoreTable<TData>
+  ) => CoreCell<TData, unknown>
+  createColumn?: (
+    column: CoreColumn<TData, unknown>,
+    table: CoreTable<TData>
+  ) => CoreColumn<TData, unknown>
+  createHeader?: (
+    column: CoreColumn<TData, unknown>,
+    table: CoreTable<TData>
+  ) => CoreHeader<TData, unknown>
+  createRow?: (row: CoreRow<TData>, table: CoreTable<TData>) => CoreRow<TData>
+  createTable?: (table: CoreTable<TData>) => CoreTable<TData>
+  getDefaultColumnDef?: () => Partial<ColumnDef<TData, unknown>>
+  getDefaultOptions?: (
+    table: CoreTable<TData>
+  ) => Partial<TableOptionsResolved<TData>>
+  getInitialState?: (initialState?: InitialTableState) => Partial<TableState>
 }
-
-const features = [
-  Headers,
-  Visibility,
-  Ordering,
-  Pinning,
-  Filters,
-  Sorting,
-  Grouping,
-  Expanding,
-  Pagination,
-  RowSelection,
-  ColumnSizing,
-] as const
 
 //
 
 export interface CoreTableState {}
 
 export interface CoreOptions<TData extends RowData> {
+  _features: readonly TableFeature<TData>[]
   /**
    * Set this option to override any of the `autoReset...` feature options.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#autoresetall)
@@ -74,7 +74,7 @@ export interface CoreOptions<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#columns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  columns: ColumnDef<TData, any>[]
+  columns: ColumnDef<TData, unknown>[]
   /**
    * The data for the table to display. This array should match the type you provided to `table.setRowType<...>`. Columns can access this data via string/index or a functional accessor. When the `data` option changes reference, the table will reprocess the data.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#data)
@@ -122,14 +122,18 @@ export interface CoreOptions<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getcorerowmodel)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getCoreRowModel: (table: Table<any>) => () => RowModel<any>
+  getCoreRowModel: (table: CoreTable<TData>) => () => RowModel<TData>
   /**
    * This optional function is used to derive a unique ID for any given row. If not provided the rows index is used (nested rows join together with `.` using their grandparents' index eg. `index.index.index`). If you need to identify individual rows that are originating from any server-side operations, it's suggested you use this function to return an ID that makes sense regardless of network IO/ambiguity eg. a userId, taskId, database ID field, etc.
    * @example getRowId: row => row.userId
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getrowid)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string
+  getRowId?: (
+    originalRow: TData,
+    index: number,
+    parent?: CoreRow<TData>
+  ) => string
   /**
    * This optional function is used to access the sub rows for any given row. If you are using nested rows, you will need to use this function to return the sub rows object (or undefined) from the row.
    * @example getSubRows: row => row.subRows
@@ -182,38 +186,38 @@ export interface CoreOptions<TData extends RowData> {
   state: Partial<TableState>
 }
 
-export interface CoreInstance<TData extends RowData> {
-  _features: readonly TableFeature[]
-  _getAllFlatColumnsById: () => Record<string, Column<TData, unknown>>
+export interface CoreTable<TData extends RowData> {
+  _features: readonly TableFeature<TData>[]
+  _getAllFlatColumnsById: () => Record<string, CoreColumn<TData, unknown>>
   _getColumnDefs: () => ColumnDef<TData, unknown>[]
   _getCoreRowModel?: () => RowModel<TData>
   _getDefaultColumnDef: () => Partial<ColumnDef<TData, unknown>>
-  _getRowId: (_: TData, index: number, parent?: Row<TData>) => string
+  _getRowId: (_: TData, index: number, parent?: CoreRow<TData>) => string
   _queue: (cb: () => void) => void
   /**
    * Returns all columns in the table in their normalized and nested hierarchy.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getallcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getAllColumns: () => Column<TData, unknown>[]
+  getAllColumns: () => CoreColumn<TData, unknown>[]
   /**
    * Returns all columns in the table flattened to a single level.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getallflatcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getAllFlatColumns: () => Column<TData, unknown>[]
+  getAllFlatColumns: () => CoreColumn<TData, unknown>[]
   /**
    * Returns all leaf-node columns in the table flattened to a single level. This does not include parent columns.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getallleafcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getAllLeafColumns: () => Column<TData, unknown>[]
+  getAllLeafColumns: () => CoreColumn<TData, unknown>[]
   /**
    * Returns a single column by its ID.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getcolumn)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getColumn: (columnId: string) => Column<TData, unknown> | undefined
+  getColumn: (columnId: string) => CoreColumn<TData, unknown> | undefined
   /**
    * Returns the core row model before any processing has been applied.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getcorerowmodel)
@@ -225,7 +229,7 @@ export interface CoreInstance<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getrow)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  getRow: (id: string, searchAll?: boolean) => Row<TData>
+  getRow: (id: string, searchAll?: boolean) => CoreRow<TData>
   /**
    * Returns the final model after all processing from other used features has been applied. This is the row model that is most commonly used for rendering.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#getrowmodel)
@@ -270,14 +274,16 @@ export interface CoreInstance<TData extends RowData> {
   setState: (updater: Updater<TableState>) => void
 }
 
-export function createTable<TData extends RowData>(
+export function createCoreTable<TData extends RowData>(
   options: TableOptionsResolved<TData>
-): Table<TData> {
+): CoreTable<TData> {
   if (options.debugAll || options.debugTable) {
     console.info('Creating Table Instance...')
   }
 
-  let table = { _features: features } as unknown as Table<TData>
+  console.log('options', options)
+
+  let table = { _features: options._features } as unknown as CoreTable<TData>
 
   const defaultOptions = table._features.reduce((obj, feature) => {
     return Object.assign(obj, feature.getDefaultOptions?.(table))
@@ -299,7 +305,7 @@ export function createTable<TData extends RowData>(
   let initialState = {
     ...coreInitialState,
     ...(options.initialState ?? {}),
-  } as TableState
+  } as Partial<TableState>
 
   table._features.forEach(feature => {
     initialState = feature.getInitialState?.(initialState) ?? initialState
@@ -308,8 +314,7 @@ export function createTable<TData extends RowData>(
   const queued: (() => void)[] = []
   let queuedTimeout = false
 
-  const coreInstance: CoreInstance<TData> = {
-    _features: features,
+  const coreInstance: CoreTable<TData> = {
     options: {
       ...defaultOptions,
       ...options,
@@ -356,7 +361,7 @@ export function createTable<TData extends RowData>(
       table.options.onStateChange?.(updater)
     },
 
-    _getRowId: (row: TData, index: number, parent?: Row<TData>) =>
+    _getRowId: (row: TData, index: number, parent?: CoreRow<TData>) =>
       table.options.getRowId?.(row, index, parent) ??
       `${parent ? [parent.id, index].join('.') : index}`,
 
@@ -430,11 +435,11 @@ export function createTable<TData extends RowData>(
       columnDefs => {
         const recurseColumns = (
           columnDefs: ColumnDef<TData, unknown>[],
-          parent?: Column<TData, unknown>,
+          parent?: CoreColumn<TData, unknown>,
           depth = 0
-        ): Column<TData, unknown>[] => {
+        ): CoreColumn<TData, unknown>[] => {
           return columnDefs.map(columnDef => {
-            const column = createColumn(table, columnDef, depth, parent)
+            const column = createCoreColumn(table, columnDef, depth, parent)
 
             const groupingColumnDef = columnDef as GroupColumnDef<
               TData,
@@ -478,7 +483,7 @@ export function createTable<TData extends RowData>(
             acc[column.id] = column
             return acc
           },
-          {} as Record<string, Column<TData, unknown>>
+          {} as Record<string, CoreColumn<TData, unknown>>
         )
       },
       {
@@ -518,4 +523,26 @@ export function createTable<TData extends RowData>(
   }
 
   return table
+}
+
+const features = [
+  Headers,
+  Visibility,
+  Ordering,
+  Pinning,
+  Filters,
+  Sorting,
+  Grouping,
+  Expanding,
+  Pagination,
+  RowSelection,
+  ColumnSizing,
+] as const
+
+export const createTable = <TData extends RowData>(
+  options: TableOptions<TData>
+): Table<TData> => {
+  options._features = [...(options?._features ?? []), ...features]
+  const table = createCoreTable<TData>(options as any)
+  return table as Table<TData>
 }

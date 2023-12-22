@@ -1,14 +1,14 @@
 import {
-  Column,
-  Table,
   AccessorFn,
   ColumnDef,
   RowData,
   ColumnDefResolved,
+  CellValue,
 } from '../types'
 import { memo } from '../utils'
+import { CoreTable } from './table'
 
-export interface CoreColumn<TData extends RowData, TValue> {
+export interface CoreColumn<TData extends RowData, TValue extends CellValue> {
   /**
    * The resolved accessor function to use when extracting the value for the column from each row. Will only be defined if the column def has a valid accessor key or function defined.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/column#accessorfn)
@@ -26,7 +26,7 @@ export interface CoreColumn<TData extends RowData, TValue> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/column#columns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/column-defs)
    */
-  columns: Column<TData, TValue>[]
+  columns: CoreColumn<TData, TValue>[]
   /**
    * The depth of the column (if grouped) relative to the root column def array.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/column#depth)
@@ -38,13 +38,13 @@ export interface CoreColumn<TData extends RowData, TValue> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/column#getflatcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/column-defs)
    */
-  getFlatColumns: () => Column<TData, TValue>[]
+  getFlatColumns: () => CoreColumn<TData, TValue>[]
   /**
    * Returns an array of all leaf-node columns for this column. If a column has no children, it is considered the only leaf-node column.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/column#getleafcolumns)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/column-defs)
    */
-  getLeafColumns: () => Column<TData, TValue>[]
+  getLeafColumns: () => CoreColumn<TData, TValue>[]
   /**
    * The resolved unique identifier for the column resolved in this priority:
       - A manual `id` property from the column def
@@ -59,15 +59,15 @@ export interface CoreColumn<TData extends RowData, TValue> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/column#parent)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/column-defs)
    */
-  parent?: Column<TData, TValue>
+  parent?: CoreColumn<TData, TValue>
 }
 
-export function createColumn<TData extends RowData, TValue>(
-  table: Table<TData>,
+export function createCoreColumn<TData extends RowData, TValue>(
+  table: CoreTable<TData>,
   columnDef: ColumnDef<TData, TValue>,
   depth: number,
-  parent?: Column<TData, TValue>
-): Column<TData, TValue> {
+  parent?: CoreColumn<TData, TValue>
+): CoreColumn<TData, TValue> {
   const defaultColumn = table._getDefaultColumnDef()
 
   const resolvedColumnDef = {
@@ -122,18 +122,18 @@ export function createColumn<TData extends RowData, TValue>(
     throw new Error()
   }
 
-  let column: CoreColumn<TData, any> = {
+  let column: CoreColumn<TData, TValue> = {
     id: `${String(id)}`,
     accessorFn,
     parent: parent as any,
     depth,
-    columnDef: resolvedColumnDef as ColumnDef<TData, any>,
+    columnDef: resolvedColumnDef as ColumnDef<TData, TValue>,
     columns: [],
     getFlatColumns: memo(
       () => [true],
       () => {
         return [
-          column as Column<TData, TValue>,
+          column as CoreColumn<TData, TValue>,
           ...column.columns?.flatMap(d => d.getFlatColumns()),
         ]
       },
@@ -153,7 +153,7 @@ export function createColumn<TData extends RowData, TValue>(
           return orderColumns(leafColumns)
         }
 
-        return [column as Column<TData, TValue>]
+        return [column as CoreColumn<TData, TValue>]
       },
       {
         key: process.env.NODE_ENV === 'production' && 'column.getLeafColumns',
@@ -166,6 +166,5 @@ export function createColumn<TData extends RowData, TValue>(
     feature.createColumn?.(column, table)
   }
 
-  // Yes, we have to convert table to uknown, because we know more than the compiler here.
-  return column as Column<TData, TValue>
+  return column as CoreColumn<TData, TValue>
 }

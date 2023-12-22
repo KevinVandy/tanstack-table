@@ -362,7 +362,7 @@ export interface FiltersInstance<TData extends RowData> {
 
 //
 
-export const Filters: TableFeature = {
+export const Filters: TableFeature<any> = {
   getDefaultColumnDef: <TData extends RowData>(): FiltersColumnDef<TData> => {
     return {
       filterFn: 'auto',

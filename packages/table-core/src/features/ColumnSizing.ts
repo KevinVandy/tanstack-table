@@ -216,7 +216,7 @@ const getDefaultColumnSizingInfoState = (): ColumnSizingInfoState => ({
   columnSizingStart: [],
 })
 
-export const ColumnSizing: TableFeature = {
+export const ColumnSizing: TableFeature<any> = {
   getDefaultColumnDef: (): ColumnSizingColumnDef => {
     return defaultColumnSizing
   },
