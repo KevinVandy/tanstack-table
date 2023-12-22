@@ -21,12 +21,13 @@ import { CoreHeader, Headers } from './headers'
 //
 
 import { ColumnSizing } from '../features/ColumnSizing'
+import { ColumnPinning } from '../features/ColumnPinning'
 import { Expanding } from '../features/Expanding'
 import { Filters } from '../features/Filters'
 import { Grouping } from '../features/Grouping'
 import { Ordering } from '../features/Ordering'
 import { Pagination } from '../features/Pagination'
-import { Pinning } from '../features/Pinning'
+import { RowPinning } from '../features/RowPinning'
 import { RowSelection } from '../features/RowSelection'
 import { Sorting } from '../features/Sorting'
 import { Visibility } from '../features/Visibility'
@@ -529,7 +530,8 @@ const features = [
   Headers,
   Visibility,
   Ordering,
-  Pinning,
+  RowPinning,
+  ColumnPinning,
   Filters,
   Sorting,
   Grouping,

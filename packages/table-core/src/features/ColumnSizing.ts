@@ -1,7 +1,7 @@
 import { TableFeature } from '../core/table'
 import { RowData, Column, Header, OnChangeFn, Table, Updater } from '../types'
 import { makeStateUpdater } from '../utils'
-import { ColumnPinningPosition } from './Pinning'
+import { ColumnPinningPosition } from './RowPinning'
 
 //
 
