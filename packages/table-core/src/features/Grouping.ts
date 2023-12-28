@@ -1,4 +1,4 @@
-import { RowModel } from '..'
+import { CoreColumn, RowModel } from '..'
 import { BuiltInAggregationFn, aggregationFns } from '../aggregationFns'
 import { TableFeature } from '../core/table'
 import {
@@ -398,8 +398,8 @@ export const Grouping: TableFeature<any> = {
 }
 
 export function orderColumns<TData extends RowData>(
-  leafColumns: Column<TData, unknown>[],
-  grouping: string[],
+  leafColumns: CoreColumn<TData, unknown>[],
+  grouping?: string[],
   groupedColumnMode?: GroupingColumnMode
 ) {
   if (!grouping?.length || !groupedColumnMode) {

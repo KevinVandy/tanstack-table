@@ -40,17 +40,17 @@ export interface TableFeature<TData extends RowData> {
     column: CoreColumn<TData, unknown>,
     row: CoreRow<TData>,
     table: CoreTable<TData>
-  ) => CoreCell<TData, unknown>
+  ) => void
   createColumn?: (
     column: CoreColumn<TData, unknown>,
     table: CoreTable<TData>
-  ) => CoreColumn<TData, unknown>
+  ) => void
   createHeader?: (
     column: CoreColumn<TData, unknown>,
-    table: CoreTable<TData>
+    table: void
   ) => CoreHeader<TData, unknown>
-  createRow?: (row: CoreRow<TData>, table: CoreTable<TData>) => CoreRow<TData>
-  createTable?: (table: CoreTable<TData>) => CoreTable<TData>
+  createRow?: (row: CoreRow<TData>, table: CoreTable<TData>) => void
+  createTable?: (table: CoreTable<TData>) => void
   getDefaultColumnDef?: () => Partial<ColumnDef<TData, unknown>>
   getDefaultOptions?: (
     table: CoreTable<TData>
@@ -248,7 +248,7 @@ export interface CoreTable<TData extends RowData> {
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#initialstate)
    * @link [Guide](https://tanstack.com/table/v8/docs/guide/tables)
    */
-  initialState: TableState
+  initialState: Partial<TableState>
   /**
    * A read-only reference to the table's current options.
    * @link [API Docs](https://tanstack.com/table/v8/docs/api/core/table#options)

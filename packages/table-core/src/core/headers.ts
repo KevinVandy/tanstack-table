@@ -326,7 +326,12 @@ export const Headers: TableFeature<any> = {
             ?.map(columnId => leafColumns.find(d => d.id === columnId)!)
             .filter(Boolean) ?? []
 
-        return buildCoreHeaderGroups(allColumns, orderedLeafColumns, table, 'left')
+        return buildCoreHeaderGroups(
+          allColumns,
+          orderedLeafColumns,
+          table,
+          'left'
+        )
       },
       {
         key: process.env.NODE_ENV === 'development' && 'getLeftHeaderGroups',
@@ -346,7 +351,12 @@ export const Headers: TableFeature<any> = {
             ?.map(columnId => leafColumns.find(d => d.id === columnId)!)
             .filter(Boolean) ?? []
 
-        return buildCoreHeaderGroups(allColumns, orderedLeafColumns, table, 'right')
+        return buildCoreHeaderGroups(
+          allColumns,
+          orderedLeafColumns,
+          table,
+          'right'
+        )
       },
       {
         key: process.env.NODE_ENV === 'development' && 'getRightHeaderGroups',

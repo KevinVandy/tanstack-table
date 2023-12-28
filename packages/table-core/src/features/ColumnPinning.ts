@@ -1,4 +1,5 @@
-import { TableFeature } from '../core/table'
+import { CoreColumn } from '../core/column'
+import { CoreTable, TableFeature } from '../core/table'
 import {
   OnChangeFn,
   Updater,
@@ -144,7 +145,7 @@ export interface ColumnPinningInstance<TData extends RowData> {
 
 //
 
-const getDefaultColumnPinningState = (): ColumnPinningState => ({
+export const getDefaultColumnPinningState = (): ColumnPinningState => ({
   left: [],
   right: [],
 })
@@ -158,7 +159,7 @@ export const ColumnPinning: TableFeature<any> = {
   },
 
   getDefaultOptions: <TData extends RowData>(
-    table: Table<TData>
+    table: CoreTable<TData>
   ): ColumnPinningDefaultOptions => {
     return {
       onColumnPinningChange: makeStateUpdater('columnPinning', table),
@@ -166,7 +167,7 @@ export const ColumnPinning: TableFeature<any> = {
   },
 
   createColumn: <TData extends RowData, TValue>(
-    column: Column<TData, TValue>,
+    column: CoreColumn<TData, TValue>,
     table: Table<TData>
   ): void => {
     column.pin = position => {

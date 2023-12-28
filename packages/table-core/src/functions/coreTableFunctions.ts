@@ -1,4 +1,4 @@
-import { RequiredKeys, functionalUpdate, orderColumns } from '..'
+import { CoreRow, RequiredKeys, functionalUpdate, orderColumns } from '..'
 import { CoreColumn, createCoreColumn } from '../core/column'
 import { CoreTable } from '../core/table'
 import {
@@ -73,7 +73,7 @@ export function setTableState<TData extends RowData>({
   table.options.onStateChange?.(updater)
 }
 
-export function _getRowId<TData extends RowData, CoreRow<TData> extends TData = TData>({
+export function _getRowId<TData extends RowData>({
   row,
   table,
 }: {
@@ -89,7 +89,6 @@ export function _getRowId<TData extends RowData, CoreRow<TData> extends TData = 
 
 export function getTableCoreRowModel<
   TData extends RowData,
-  CoreRow<TData> extends TData = TData,
 >({ table }: { table: CoreTable<TData> }) {
   if (!table._getCoreRowModel) {
     table._getCoreRowModel = table.options.getCoreRowModel(table)
@@ -205,23 +204,19 @@ export function getAllTableFlatColumns<
 
 export function _getAllTableFlatColumnsById<
   TData extends RowData,
-  TValue extends CellValue = CellValue,
-  
->({ flatColumns }: { flatColumns: CoreColumn<TData, TValue>[]; table: CoreTable<TData> }) {
+>({ flatColumns }: { flatColumns: CoreColumn<TData, unknown>[]; table: CoreTable<TData> }) {
   return flatColumns.reduce(
     (acc, column) => {
       acc[column.id] = column
       return acc
     },
-    {} as Record<string, CoreColumn<TData, TValue>>
+    {} as Record<string, CoreColumn<TData, unknown>>
   )
 }
 
 export function getAllTableLeafColumns<
   TData extends RowData,
-  TValue extends CellValue = CellValue,
-  
->({ allColumns }: { allColumns: CoreColumn<TData, TValue>[]; table: CoreTable<TData> }) {
+>({ allColumns }: { allColumns: CoreColumn<TData, unknown>[]; table: CoreTable<TData> }) {
   let leafColumns = allColumns.flatMap(column => column.getLeafColumns())
   return orderColumns(leafColumns)
 }
