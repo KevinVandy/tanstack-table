@@ -24,6 +24,7 @@
     "type": "github",
     "url": "https://github.com/sponsors/tannerlinsley"
   },
+  "type": "commonjs",
   "module": "build/lib/index.esm.js",
   "main": "build/lib/index.js",
   "types": "build/lib/index.d.ts",
@@ -43,5 +44,14 @@
     "build/lib/*",
     "build/umd/*",
     "src"
-  ]
+  ],
+  "scripts": {
+    "clean": "rimraf ./build",
+    "test:lib": "vitest",
+    "test:lib:dev": "pnpm test:lib --watch",
+    "test:types": "tsc --noEmit",
+    "build": "pnpm build:rollup && pnpm build:types",
+    "build:rollup": "rollup --config rollup.config.mjs",
+    "build:types": "tsc --emitDeclarationOnly"
+  }
 }
