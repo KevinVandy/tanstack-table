@@ -4,11 +4,10 @@
     createSvelteTable,
     getCoreRowModel,
     getSortedRowModel,
-    TableOptions,
     flexRender,
-    ColumnDef,
   } from '@tanstack/svelte-table'
-  import { makeData, Person } from './makeData'
+  import type { ColumnDef, TableOptions } from '@tanstack/svelte-table'
+  import { makeData, type Person } from './makeData'
   import { faker } from '@faker-js/faker'
   import './index.css'
 

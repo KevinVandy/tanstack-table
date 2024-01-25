@@ -12,7 +12,7 @@ Want to skip to the implementation? Check out these examples:
 
 [Column Ordering API](../api/features/column-ordering)
 
-## Overview
+## Column Ordering Guide
 
 There are 3 table features that can reorder columns, which happen in the following order:
 

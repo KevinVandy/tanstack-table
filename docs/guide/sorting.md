@@ -12,3 +12,5 @@ Want to skip to the implementation? Check out these examples:
 ## API
 
 [Sorting API](../api/features/sorting)
+
+## Sorting Guide
